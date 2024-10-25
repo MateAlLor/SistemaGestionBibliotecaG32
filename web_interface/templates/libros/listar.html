@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='botones.js') }}"></script>
+
+    <title>Inicio</title>
+</head>
+
+<body>
+    <h1>Listado de Libros</h1>
+    <div class="divcentral">
+        {% if libros %}
+        <div class="listado">
+            {% for libro in libros %}
+            <div class="elemento-lista">
+                <p>ISBN: {{libro._ISBN}}</p>
+                <p>Título: {{libro._Titulo}}</p>
+                <p>Género: {{libro._Genero}}</p>
+                <p>Año: {{libro._Apellido}}</p>
+                <p>Autor: {{libro._Autor._Nombre}} {{libro._Autor._Apellido}}</p>
+                <p>Autor: {{libro._Cantidad}}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <h2>No hay libros cargados</h2>
+        {% endif %}
+    </div>
+
+    <div class="interfazbase">
+        <button onclick="redirigirBoton('/libros')">Volver</button>
+        <button onclick="redirigirBoton('/home')">Inicio</button>
+    </div>
+
+</body>
+
+
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='botones.js') }}"></script>
+    <title>Inicio</title>
+</head>
+
+<body>
+    {% if alert %}
+    <script>
+        alert('{{alert}}')
+    </script>
+    {% endif %}
+    <h1>Registrar Usuario</h1>
+    <div class="divcentral">
+        <form action="{{ url_for('libros_registrar_post')}}" method="POST" class="formulario" id="formulario">
+            <label for="isbn">ISBN:</label>
+            <input type="number" id="isbn" name="isbn">
+
+            <label for="titulo">Título:</label>
+            <input type="text" id="titulo" name="titulo">
+
+            <label for="genero">Género:</label>
+            <input type="text" id="genero" name="genero">
+
+            <label for="anio">Año de Publicación:</label>
+            <input type="number" id="anio" name="anio">
+
+            <label for="autor">ID del Autor:</label>
+            <input type="number" id="autor" name="autor">
+
+            <label for="cantidad">Cantidad Disponible:</label>
+            <input type="number" id="cantidad" name="cantidad">
+
+            <input id="submit_button" type="submit" value="Continuar">
+        </form>
+    </div>
+
+    <div class="interfazbase">
+        <button onclick="redirigirBoton('/libros')">Volver</button>
+        <button onclick="redirigirBoton('/home')">Inicio</button>
+    </div>
+
+</body>
+
+<script>
+    document.getElementById('formulario').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const isbn = document.getElementById('isbn').value.trim();
+        const titulo = document.getElementById('titulo').value.trim();
+        const genero = document.getElementById('genero').value.trim();
+        const anio = document.getElementById('anio').value.trim();
+        const autor = document.getElementById('autor').value.trim();
+        const cantidad = document.getElementById('cantidad').value.trim();
+
+
+        if (!isbn) {
+            alert("El ISBN no puede estar vacío")
+        } else if (!titulo) {
+            alert("El Título no puede estar vacío")
+        } else if (!genero) {
+            alert("El Género no puede estar vacío")
+        }else if (!anio) {
+            alert("El Año no puede estar vacío")
+        }else if (!autor) {
+            alert("El ID del Autor no puede estar vacío")
+        }else if (!cantidad) {
+            alert("La cantidad disponible no puede estar vacía")
+        }else {
+            document.getElementById('formulario').submit();
+        }
+    });
+
+</script>
+
+</html>

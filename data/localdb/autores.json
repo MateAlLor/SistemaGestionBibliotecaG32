@@ -1,0 +1,20 @@
+[
+    {
+        "id": 0,
+        "nombre": "ASDASD",
+        "apellido": "ASDASD",
+        "nacionalidad": "ASDASD"
+    },
+    {
+        "id": 1,
+        "nombre": "ASDASDAS2",
+        "apellido": "ASDASD2",
+        "nacionalidad": "ASDASD2"
+    },
+    {
+        "id": 2,
+        "nombre": "TercerAutor",
+        "apellido": "TercerAutor",
+        "nacionalidad": "TercerAutor"
+    }
+]

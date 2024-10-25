@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='botones.js') }}"></script>
+    <title>Inicio</title>
+</head>
+
+<body>
+    {% if alert %}
+    <script>
+        alert('{{alert}}')
+    </script>
+    {% endif %}
+    <h1>Registrar Autor</h1>
+    <div class="divcentral">
+        <form action="{{ url_for('autores_registrar_post') }}" method="POST" class="formulario" id="formulario">
+            <label for="id">ID:</label>
+            <input type="text" id="id" name="id" value="{{id}}" readonly>
+
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre">
+
+            <label for="apellido">Apellido:</label>
+            <input type="text" id="apellido" name="apellido">
+
+            <label for="nacionalidad">Nacionalidad:</label>
+            <input type="text" id="nacionalidad" name="nacionalidad">
+
+            <input id="submit_button" type="submit" value="Continuar">
+        </form>
+    </div>
+
+    <div class="interfazbase">
+        <button onclick="redirigirBoton('/autores')">Volver</button>
+        <button onclick="redirigirBoton('/home')">Inicio</button>
+    </div>
+
+</body>
+
+<script>
+    document.getElementById('formulario').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const nombre = document.getElementById('nombre').value.trim();
+        const apellido = document.getElementById('apellido').value.trim();
+        const nacionalidad = document.getElementById('nacionalidad').value.trim();
+
+        if (!nombre) {
+            alert("El Nombre no puede estar vacío")
+        } else if (!apellido) {
+            alert("El Apellido no puede estar vacío")
+        } else if (!nacionalidad) {
+            alert("La Nacionalidad no puede estar vacía")
+        } else {
+            document.getElementById('formulario').submit();
+        }
+    });
+
+</script>
+
+</html>

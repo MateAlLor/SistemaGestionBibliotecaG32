@@ -1,0 +1,10 @@
+[
+    {
+        "isbn": 5000,
+        "titulo": "TEST",
+        "genero": "TEST",
+        "anio": 2000,
+        "autor": 0,
+        "cantidad": 2
+    }
+]

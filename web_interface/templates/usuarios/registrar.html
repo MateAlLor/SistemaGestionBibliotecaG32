@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='botones.js') }}"></script>
+    <title>Inicio</title>
+</head>
+
+<body>
+    {% if alert %}
+    <script>
+        alert('{{alert}}')
+    </script>
+    {% endif %}
+    <h1>Registrar Usuario</h1>
+    <div class="divcentral">
+        <form action="{{ url_for('usuarios_registrar_post') }}" method="POST" class="formulario" id="formulario">
+            <label for="id">ID:</label>
+            <input type="text" id="id" name="id" value="{{id}}" readonly>
+            
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre">
+
+            <label for="apellido">Apellido:</label>
+            <input type="text" id="apellido" name="apellido">
+
+            <div class="select-container">
+                <!-- <label for="tipo">Elige una opción:</label> -->
+                <select id="tipo" name="tipo" class="styled-select">
+                    <option value="1" selected>Estudiante</option>
+                    <option value="2">Profesor</option>
+                </select>
+            </div>
+
+            <input id="submit_button" type="submit" value="Continuar">
+        </form>
+    </div>
+
+    <div class="interfazbase">
+        <button onclick="redirigirBoton('/usuarios')">Volver</button>
+        <button onclick="redirigirBoton('/home')">Inicio</button>
+    </div>
+
+</body>
+
+<script>
+    document.getElementById('formulario').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const nombre = document.getElementById('nombre').value.trim();
+        const apellido = document.getElementById('apellido').value.trim();
+
+        if (!nombre) {
+            alert("El Nombre no puede estar vacío")
+        } else if (!apellido) {
+            alert("El Apellido no puede estar vacío")
+        } else {
+            document.getElementById('formulario').submit();
+        }
+    });
+
+</script>
+
+</html>
