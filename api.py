@@ -75,6 +75,9 @@ class LocalApi:
     
     # Escrituras
     def add_libro(self, isbn : int, titulo : str, genero : str, anio : int, autor_id : int, cantidad : int) -> tuple[bool, str]:
+        if isbn == None or titulo.replace(' ', '') == "" or genero.replace(' ', '') == "" or anio == None or autor_id == None or cantidad == None:
+            return False, 'No puede haber ningún atributo vacío'
+            
         libros = self.get_libros()
         autores = self.get_autores()
         
@@ -99,6 +102,9 @@ class LocalApi:
         return False, 'No hay ningún autor con ese ID'
     
     def add_autor(self, id : int, nombre : str, apellido : str, nacionalidad : str) -> tuple[bool, str]:
+        if id == None or nombre.replace(' ', '') == '' or apellido.replace(' ', '') == '' or nacionalidad.replace(' ', '') == '':
+            return False, 'No puede haber ningún atributo vacío'
+
         autores = self.get_autores()
         autores_json = []
         for autor in autores:
@@ -114,6 +120,9 @@ class LocalApi:
         return True, "Autor registrado correctamente"
     
     def add_usuario(self, id : int, nombre : str, apellido : str, tipo : int) -> tuple[bool, str]:
+        if id == None or nombre.replace(' ', '') == '' or apellido.replace(' ', '') == '' or tipo == None:
+            return False, 'No puede haber ningún atributo vacío'
+
         usuarios = self.get_usuarios()
         usuarios_json = []
         for usuario in usuarios:

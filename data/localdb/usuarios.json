@@ -22,5 +22,29 @@
         "nombre": "TEST3",
         "apellido": "TEST3",
         "tipo": 2
+    },
+    {
+        "id": 4,
+        "nombre": "Test US4",
+        "apellido": "US4AP",
+        "tipo": 2
+    },
+    {
+        "id": 5,
+        "nombre": "TEST5",
+        "apellido": "TEST5",
+        "tipo": 1
+    },
+    {
+        "id": 6,
+        "nombre": "TEST6",
+        "apellido": "TEST6",
+        "tipo": 2
+    },
+    {
+        "id": 7,
+        "nombre": "TEST7",
+        "apellido": "TEST7",
+        "tipo": 1
     }
 ]

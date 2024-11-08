@@ -10,13 +10,20 @@ class Autor:
         self._Apellido = apellido
         self._Nacionalidad = nacionalidad
     
+    def __str__(self):
+        text = f'ID: {self._ID}'
+        text += f'\n\tNombre: {self._Nombre}'
+        text += f'\n\tApellido: {self._Apellido}'
+        text += f'\n\tNacionalidad: {self._Nacionalidad}'
+        return text
+    
     @classmethod
     def init_from_json(cls, json_data):
         return cls(
             id=json_data['id'],
             nombre=json_data['nombre'],
             apellido=json_data['apellido'],
-            nacionalidad=json_data['apellido']
+            nacionalidad=json_data['nacionalidad']
         )
 
     def convert_to_json(self):
@@ -34,6 +41,15 @@ class Usuario:
         self._Nombre = nombre
         self._Apellido = apellido
         self._Tipo = tipo # Tipos de Usuario: 1=Estudiante; 2=Profesor
+    
+    def __str__(self):
+        text = f'ID: {self._ID}'
+        text += f'\n\tNombre: {self._Nombre}'
+        text += f'\n\tApellido: {self._Apellido}'
+        text += f'\n\tTipo: {self._Tipo}'
+        return text
+    
+    
     
     @classmethod
     def init_from_json(cls, json_data):
@@ -60,21 +76,30 @@ class Libro:
         self._Anio = anio
         self._Autor = autor
         self._Cantidad = cantidad
+
+    def __str__(self):
+        text = f'ISBN: {self._ISBN}'
+        text += f'\n\tGenero: {self._Titulo}'
+        text += f'\n\tApellido: {self._Genero}'
+        text += f'\n\tAnio: {self._Anio}'
+        text += f'\n\tAutor: {self._Autor}'
+        text += f'\n\tCantidad: {self._Cantidad}'
+        return text
     
     @classmethod
     def init_from_json(cls, json_data):
-        print("ENTRA AL INIT FROM JSON DEL LIBRO")
+        # print("ENTRA AL INIT FROM JSON DEL LIBRO")
         db = Database(os.path.join("data", "localdb"))
         autores_json = db.load_file('autores.json')
-        print('LOS AUTORES JSON SON ESTOS:')
-        print(autores_json)
+        # print('LOS AUTORES JSON SON ESTOS:')
+        # print(autores_json)
 
         autor_final = None
         for autor_json in autores_json:
             if autor_json['id'] == json_data['autor']:
                 autor_final = Autor.init_from_json(autor_json)
                 break
-        print("EL AUTOR FINAL ES ESTE:", autor_final)
+        # print("EL AUTOR FINAL ES ESTE:", autor_final)
 
         return cls(
             isbn=json_data['isbn'],
@@ -102,6 +127,14 @@ class Prestamo:
         self._Libro = libro
         self._FechaPrestamo = fecha_prestamo
         self._FechaDevolucion = fecha_devolucion
+    
+    def __str__(self):
+        text = f'ID: {self._ID}'
+        text += f'\n\tUsuario: {self._Usuario}'
+        text += f'\n\tLibro: {self._Libro}'
+        text += f'\n\tFecha del Préstamo: {self._FechaPrestamo}'
+        text += f'\n\tFecha de Devolución: {self._FechaDevolucion}'
+        return text
     
     @classmethod
     def init_from_json(cls, json_data):
