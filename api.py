@@ -1,8 +1,12 @@
-from utils.clases import Libro, Autor, Usuario, Prestamo
 from db.localdb import Database # Cambiar el import a Database cuando dejemos de usar archivos
 from typing import List
 from datetime import date
 import os
+
+from clases.autor import Autor
+from clases.libro import Libro
+from clases.prestamo import Prestamo
+from clases.usuario import Usuario
 
 class LocalApi:
     def __init__(self) -> None:
@@ -53,7 +57,7 @@ class LocalApi:
     
     def get_prestamos(self) -> List[Prestamo]:
         vec = []
-        prestamos = self.DATABASE.load_file('usuarios.json')
+        prestamos = self.DATABASE.load_file('prestamos.json')
         for prestamo in prestamos:
             vec.append(Prestamo.init_from_json(prestamo))
         return vec
@@ -65,6 +69,15 @@ class LocalApi:
                 return prestamo
         return None
     
+    def get_prestamos_byisbn(self, isbn) -> List[Prestamo]: # Obtener todos los préstamos de un Libro
+        prestamos = self.get_prestamos()
+        prestamos_por_libro = []
+        for prestamo in prestamos:
+            if prestamo._Libro._ISBN == isbn:
+                prestamos_por_libro.append(prestamo)
+        
+        return prestamos_por_libro
+    
     # Obtener IDS Autoincrementales (El unico que no tiene ID autoincremental es el Libro)
     def get_autor_id(self) -> int:
         return self.DATABASE.obtener_id_ai('autores.json')
@@ -74,7 +87,15 @@ class LocalApi:
         return self.DATABASE.obtener_id_ai('prestamos.json')
     
     # Escrituras
-    def add_libro(self, isbn : int, titulo : str, genero : str, anio : int, autor_id : int, cantidad : int) -> tuple[bool, str]:
+    # def add_libro(self, isbn : int, titulo : str, genero : str, anio : int, autor_id : int, cantidad : int) -> tuple[bool, str]:
+    def add_libro(self, libro_param : Libro) -> tuple[bool, str]:
+        isbn = libro_param._ISBN
+        titulo = libro_param._Titulo
+        genero = libro_param._Genero
+        anio = libro_param._Anio
+        autor_id = libro_param._Autor
+        cantidad = libro_param._Cantidad
+
         if isbn == None or titulo.replace(' ', '') == "" or genero.replace(' ', '') == "" or anio == None or autor_id == None or cantidad == None:
             return False, 'No puede haber ningún atributo vacío'
             
@@ -101,7 +122,43 @@ class LocalApi:
                 return True, "Libro registrado correctamente"
         return False, 'No hay ningún autor con ese ID'
     
-    def add_autor(self, id : int, nombre : str, apellido : str, nacionalidad : str) -> tuple[bool, str]:
+    def libro_modify_add_cantidad(self, libro_param : Libro, cantidad_aniadida : int):
+        libro_param_isbn = libro_param._ISBN
+        libros = self.get_libros()
+        libros_json = []
+        new_libro = None
+        for libro in libros:
+            if libro_param_isbn == libro._ISBN:
+                libro._Cantidad += cantidad_aniadida
+                new_libro = libro
+            libros_json.append(libro.convert_to_json())
+        self.DATABASE.save_file('libros.json', libros_json)
+        return new_libro, 'Cantidad de Libros disponibles modificada correctamente'
+
+    def prestamo_modify_devolver(self, prestamo_param : Prestamo, estaEnCondiciones = True):
+        if estaEnCondiciones:
+            self.libro_modify_add_cantidad(prestamo_param._Libro, 1) # Añadir uno a cantidad disponible
+        
+        # Agregar fecha de devolución
+        prestamos = self.get_prestamos()
+        prestamos_json = []
+        new_prestamo = prestamo_param
+        for prestamo in prestamos:
+            if prestamo._ID == prestamo_param._ID:
+                prestamo._FechaDevolucion = date.today()
+                new_prestamo = prestamo
+            prestamos_json.append(prestamo.convert_to_json())
+        self.DATABASE.save_file('prestamos.json', prestamos_json)
+        return new_prestamo, 'Prestamo devuelto correctamente'
+        
+
+
+    # def add_autor(self, id : int, nombre : str, apellido : str, nacionalidad : str) -> tuple[bool, str]:
+    def add_autor(self, autor : Autor) -> tuple[bool, str]:
+        id = autor._ID
+        nombre = autor._Nombre
+        apellido = autor._Apellido
+        nacionalidad = autor._Nacionalidad
         if id == None or nombre.replace(' ', '') == '' or apellido.replace(' ', '') == '' or nacionalidad.replace(' ', '') == '':
             return False, 'No puede haber ningún atributo vacío'
 
@@ -119,7 +176,12 @@ class LocalApi:
         self.DATABASE.save_file('autores.json', autores_json)
         return True, "Autor registrado correctamente"
     
-    def add_usuario(self, id : int, nombre : str, apellido : str, tipo : int) -> tuple[bool, str]:
+    # def add_usuario(self, id : int, nombre : str, apellido : str, tipo : int) -> tuple[bool, str]:
+    def add_usuario(self, usuario : Usuario) -> tuple[bool, str]:
+        id = usuario._ID
+        nombre = usuario._Nombre
+        apellido = usuario._Apellido
+        tipo = usuario._Tipo
         if id == None or nombre.replace(' ', '') == '' or apellido.replace(' ', '') == '' or tipo == None:
             return False, 'No puede haber ningún atributo vacío'
 
@@ -136,4 +198,25 @@ class LocalApi:
 
         self.DATABASE.save_file('usuarios.json', usuarios_json)
         return True, "Usuario registrado correctamente"
+
+
+    def add_prestamo(self, prestamo : Prestamo) -> tuple[bool, str]:
+        id = prestamo._ID
+        id_usuario = prestamo._Usuario._ID
+        isbn_libro = prestamo._Libro._ISBN
+        fecha_prestamo = prestamo._FechaPrestamo
+        fecha_devolucion = prestamo._FechaDevolucion
+
+        if id == None or id_usuario == None or isbn_libro == None or not fecha_prestamo:
+            return False, 'No puede haber ningún atributo vacío'
+
+        prestamos = self.get_prestamos()
+        prestamos_json = []
+        for prestamo_aux in prestamos:
+            prestamos_json.append(prestamo_aux.convert_to_json())
+        prestamos_json.append(prestamo.convert_to_json())
+
+
+        self.DATABASE.save_file('prestamos.json', prestamos_json)
+        return True, "Préstamo registrado correctamente"
     

@@ -1,7 +1,14 @@
 from api import LocalApi
 # from flask import Flask, render_template, redirect, url_for, request
 import dearpygui.dearpygui as dpg
-from utils.clases import Usuario, Autor, Libro
+from datetime import date
+
+
+from clases.autor import Autor
+from clases.libro import Libro
+from clases.prestamo import Prestamo
+from clases.usuario import Usuario
+
 
 class GestionApp:
     def __init__(self):
@@ -26,10 +33,10 @@ class GestionApp:
             apellido = dpg.get_value("form.autor.apellido")
             nacionalidad = dpg.get_value("form.autor.nacionalidad")
 
-            print(f'AUTOR: Nombre: {nombre}, Apell: {apellido}, Nac: {nacionalidad}')
-
             # Intenta cargar los elementos en el archivo
-            isSuccess, alert = self.LocalApi.add_autor(id, nombre, apellido, nacionalidad)
+            newAutor = Autor(id, nombre, apellido, nacionalidad)
+            isSuccess, alert = self.LocalApi.add_autor(newAutor)
+            # isSuccess, alert = self.LocalApi.add_autor(id, nombre, apellido, nacionalidad)
 
             create_autores_registrar(alert=alert)# Esto sirve para refrescar la ventana, y que se muestren un mensaje de error si algo pasó
             create_autores_listar(show=False) # Hay que reconstruir la ventana del listado para que tenga los datos actualizados. Pasandole show=False para que no se muestre en el momento
@@ -44,8 +51,10 @@ class GestionApp:
             nac_int = 1
             if tipo == "Profesor":
                 nac_int = 2
+            
+            newUser = Usuario(id, nombre, apellido, nac_int)
 
-            isSuccess, alert = self.LocalApi.add_usuario(id, nombre, apellido, nac_int)
+            isSuccess, alert = self.LocalApi.add_usuario(newUser)
             create_usuarios_registrar(alert=alert)
             create_usuarios_listar(show=False)
             self.establecer_estilos_globales()
@@ -62,7 +71,58 @@ class GestionApp:
             create_libros_registrar(alert=alert)
             create_libros_listar(show=False)
             self.establecer_estilos_globales()
+        
+        def prestamo_form_submit(id, libro, usuario, origen):
+            fecha_actual = date.today()
+            newPrestamo = Prestamo(id, usuario, libro, fecha_actual, None)
+            isSuccess, alert = self.LocalApi.add_prestamo(newPrestamo)
+            new_libro = libro
+            if isSuccess:
+                new_libro, alerta = self.LocalApi.libro_modify_add_cantidad(libro, -1)
+            create_libro_detalles(libro_aux=new_libro, origen='libros.listar')
+            ir_a_interfaz_mensaje(titulo='Préstamo', origen='prestamo.register', destino=origen, mensaje=alert)
+            # create_prestamos_listar(show=False)
+            self.establecer_estilos_globales()
+        
+        def prestamo_devolver(prestamo, origen, estaEnCondiciones=True):
+            new_prestamo, alert = self.LocalApi.prestamo_modify_devolver(prestamo, estaEnCondiciones)
+            create_prestamo_detalles(prestamo=new_prestamo, origen=origen)
+            self.establecer_estilos_globales()
 
+        
+        # Otras
+        # def ir_a_libro(origen, libro):
+        def ir_a_libro(origen, libro):
+            create_libro_detalles(libro_aux=libro, origen="libros.listar")
+            cambiar_ventana(origen, "libro.detalles")
+            self.establecer_estilos_globales()
+        
+        def ir_a_prestamo(origen, prestamo):
+            create_prestamo_detalles(prestamo=prestamo, origen=origen)
+            cambiar_ventana(origen, "prestamo.detalles")
+            self.establecer_estilos_globales()
+        
+        def ir_a_prestamo_registrar(origen, libro):
+            create_prestamo_register(libro=libro, origen=origen)
+            cambiar_ventana(origen, "prestamo.register")
+            self.establecer_estilos_globales()
+        
+        def ir_a_interfaz_mensaje(titulo=None, origen=None, destino=None, mensaje=None):
+            dest = destino
+            if not destino:
+                dest = origen
+            create_mensaje_interfaz(titulo=titulo, destino=dest, mensaje=mensaje)
+            cambiar_ventana(origen, "interfaz.mensaje")
+            self.establecer_estilos_globales()
+        
+        # INTERFAZ DE MENSAJE
+        def create_mensaje_interfaz(show=True, titulo=None, destino=None, mensaje=None):
+            dpg.delete_item("interfaz.mensaje")
+
+            with dpg.window(label=titulo, tag="interfaz.mensaje", show=show):
+                dpg.add_text(mensaje, tag='interfaz.mensaje.alert')
+
+                dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('interfaz.mensaje', destino))
 
         # Las funciones que crean las interfaces tienen por parámetro: show (si se muestra o no inicialmente : bool), alert (Un mensaje extra si hace falta : str)
         # Ruta de Inicio
@@ -75,6 +135,7 @@ class GestionApp:
                 dpg.add_button(label="Autores", callback=lambda:cambiar_ventana('inicio', 'autores'))
                 dpg.add_button(label="Usuarios", callback=lambda:cambiar_ventana('inicio', 'usuarios'))
                 dpg.add_button(label="Libros", callback=lambda:cambiar_ventana('inicio', 'libros'))
+        create_inicio()
         
         # INTERFAZ DE AUTORES
         def create_autores_interfaz(show=True, alert=None):
@@ -86,6 +147,8 @@ class GestionApp:
                 dpg.add_button(label="Registrar", callback=lambda:cambiar_ventana('autores', 'autores.registrar'))
                 dpg.add_button(label="Listar", callback=lambda:cambiar_ventana('autores', 'autores.listar'))
                 dpg.add_button(label="Volver al Inicio", callback=lambda:cambiar_ventana('autores', 'inicio'))
+        
+        create_autores_interfaz(show=False)
 
         # Registrar Autor
         def create_autores_registrar(show=True, alert=None):
@@ -102,7 +165,7 @@ class GestionApp:
                 dpg.add_input_text(label="Nacionalidad", tag="form.autor.nacionalidad", hint="Escribe la nacionalidad del autor")
                 dpg.add_button(label="Registrar", callback=lambda:autores_form_submit(id))
                 dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('autores.registrar', 'autores'))
-
+        create_autores_registrar(show=False, alert=None)
         
         # Listar Autores
         def create_autores_listar(show=True, alert=None):
@@ -116,6 +179,7 @@ class GestionApp:
                     for autor in autores:
                         dpg.add_text(str(autor))
                 dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('autores.listar', 'autores'))
+        create_autores_listar(show=False, alert=None)
         
         # INTERFAZ DE USUARIOS
         def create_usuarios(show=True, alert=None):
@@ -127,6 +191,7 @@ class GestionApp:
                 dpg.add_button(label="Registrar", callback=lambda:cambiar_ventana('usuarios', 'usuarios.registrar'))
                 dpg.add_button(label="Listar", callback=lambda:cambiar_ventana('usuarios', 'usuarios.listar'))
                 dpg.add_button(label="Volver al Inicio", callback=lambda:cambiar_ventana('usuarios', 'inicio'))
+        create_usuarios(show=False, alert=None)
         
 
         def create_usuarios_registrar(show=True, alert=None):
@@ -143,6 +208,7 @@ class GestionApp:
                 dpg.add_combo(label="Tipo", tag="form.usuario.tipo", items=["Estudiante", "Profesor"])
                 dpg.add_button(label="Registrar", callback=lambda:usuarios_form_submit(id))
                 dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('usuarios.registrar', 'usuarios'))
+        create_usuarios_registrar(show=False, alert=None)
 
         def create_usuarios_listar(show=True, alert=None):
             dpg.delete_item("usuarios.listar")
@@ -155,6 +221,8 @@ class GestionApp:
                     for user in usuarios:
                         dpg.add_text(str(user))
                 dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('usuarios.listar', 'usuarios'))
+        create_usuarios_listar(show=False, alert=None)
+        
         
         # INTERFAZ DE LIBROS
         def create_libros(show=True, alert=None):
@@ -166,6 +234,9 @@ class GestionApp:
                 dpg.add_button(label="Registrar", callback=lambda:cambiar_ventana('libros', 'libros.registrar'))
                 dpg.add_button(label="Listar", callback=lambda:cambiar_ventana('libros', 'libros.listar'))
                 dpg.add_button(label="Volver al Inicio", callback=lambda:cambiar_ventana('libros', 'inicio'))
+        # create_libros(show=False)
+        create_libros(show=False)
+        
 
         def create_libros_registrar(show=True, alert=None):
             dpg.delete_item("libros.registrar")
@@ -184,6 +255,7 @@ class GestionApp:
                 dpg.add_button(label="Registrar", callback=lambda:libros_form_submit(id))
                 
                 dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('libros.registrar', 'libros'))
+        create_libros_registrar(show=False, alert=None)
 
         def create_libros_listar(show=True, alert=None):
             dpg.delete_item("libros.listar")
@@ -194,22 +266,95 @@ class GestionApp:
                 libros = self.LocalApi.get_libros() # Obtener listado de Libros
                 with dpg.child_window(no_scrollbar=False):
                     for libro in libros:
-                        dpg.add_text(str(libro))
+                        libro_label = f'ISBN: {libro._ISBN}, Título: {libro._Titulo}, Autor: {libro._Autor._Nombre} {libro._Autor._Apellido}' 
+                        dpg.add_button(label=libro_label, callback=lambda s, a, lib: ir_a_libro('libros.listar', lib), user_data=libro)
                 dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('libros.listar', 'libros'))
-        
-        # Crear todos los elementos
-        create_inicio()
-        create_autores_interfaz(show=False)
-        create_autores_registrar(show=False)
-        create_autores_listar(show=False)
-        create_usuarios(show=False)
-        create_usuarios_registrar(show=False)
-        create_usuarios_listar(show=False)
-        create_libros(show=False)
-        create_libros_registrar(show=False)
         create_libros_listar(show=False)
         
+        def create_libro_detalles(show=True, alert=None, libro_aux=None, origen='libros'):
+            dpg.delete_item("libro.detalles")
 
+            libro = self.LocalApi.get_libro_byisbn(libro_aux._ISBN)
+
+            with dpg.window(label="Detalles del Libro", tag="libro.detalles", show=show):
+                if alert:
+                    dpg.add_text(alert, tag='libro.detalles.alert')
+
+                dpg.add_text(str(libro))
+                dpg.add_text("Prestamos de este Libro:")
+
+
+                prestamos_libro = self.LocalApi.get_prestamos_byisbn(libro._ISBN)
+
+                with dpg.child_window(no_scrollbar=False):
+                    if libro._Cantidad > 0:
+                        dpg.add_button(label="NUEVO PRÉSTAMO", callback=lambda:ir_a_prestamo_registrar('libro.detalles', libro))
+                    else:
+                        dpg.add_button(label="NUEVO PRÉSTAMO\n(SIN DISPONIBILIDAD)", enabled=False)
+                    for prestamo_libro in prestamos_libro:
+                        botontext = f"Usuario: [{prestamo_libro._Usuario._ID}] - {prestamo_libro._Usuario._Nombre} {prestamo_libro._Usuario._Apellido}\n"
+                        botontext += f"Fecha Préstamo: {prestamo_libro._FechaPrestamo}\n"
+                        if prestamo_libro._FechaDevolucion:
+                            botontext += f"Fecha Devolución: {prestamo_libro._FechaDevolucion}\n"
+                        else:
+                            botontext += f"NO DEVUELTO"
+                        # dpg.add_button(label=botontext, callback=lambda:ir_a_prestamo(prestamo_libro))
+                        dpg.add_button(label=botontext, callback=lambda s, a, par: ir_a_prestamo(prestamo=par['prestamo'], origen=par['origen']), user_data={"prestamo":prestamo_libro, "origen":origen})
+                    
+
+                dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('libro.detalles', origen))
+        
+        # INTERFAZ PRESTAMOS
+        # def create_prestamos(show=False, alert=None):
+        #     dpg.delete_item("prestamos")
+
+        #     with dpg.window(label="Préstamos", tag="prestamos", show=show):
+        #         if alert:
+        #             dpg.add_text(alert, tag='prestamos.alert')
+        #         dpg.add_button(label="Registrar", callback=lambda:cambiar_ventana('prestamos', 'prestamos.registrar'))
+        #         dpg.add_button(label="Listar", callback=lambda:cambiar_ventana('prestamos', 'prestamos.listar'))
+        #         dpg.add_button(label="Buscar Préstamo", callback=lambda:cambiar_ventana('prestamos', 'prestamos.buscar'))
+        #         dpg.add_button(label="Volver al Inicio", callback=lambda:cambiar_ventana('prestamos', 'inicio'))
+
+        def create_prestamo_detalles(show=True, alert=None, prestamo=None, origen='inicio'):
+            dpg.delete_item("prestamo.detalles")
+
+            with dpg.window(label="Detalles del Prestamo", tag="prestamo.detalles", show=show):
+                if alert:
+                    dpg.add_text(alert, tag='prestamo.detalles.alert')
+
+                dpg.add_text(str(prestamo))
+                
+                if not prestamo._FechaDevolucion:
+                    dpg.add_button(label="Marcar como devuelto", callback=lambda s, a, par: prestamo_devolver(par['prestamo'], par['origen'], estaEnCondiciones=par['condiciones']), user_data={"prestamo":prestamo, "origen":origen, "condiciones":True})
+                    dpg.add_button(label="Marcar como devuelto en malas condiciones (No se contará como disponible)", callback=lambda s, a, par: prestamo_devolver(par['prestamo'], par['origen'], estaEnCondiciones=par['condiciones']), user_data={"prestamo":prestamo, "origen":origen, "condiciones":False})
+                    
+
+                # dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('prestamo.detalles', origen))
+                dpg.add_button(label="Volver", callback=lambda:ir_a_libro('prestamo.detalles', prestamo._Libro))
+        
+        def create_prestamo_register(show=True, alert=None, libro=None, origen='prestamo.buscar'):
+            dpg.delete_item("prestamo.register")
+
+            with dpg.window(label="Registrar Préstamo", tag="prestamo.register", show=show):
+                if alert:
+                    dpg.add_text(alert, tag='libro.detalles.alert')
+                
+                id = self.LocalApi.get_prestamo_id()
+
+                dpg.add_text(f"ID del Préstamo a registrar: {id}")
+                dpg.add_text(f"Libro a Prestar:\n{libro}")
+                dpg.add_text("Elige el Usuario al cual se le prestará el Libro:")
+
+                usuarios_prest = self.LocalApi.get_usuarios()
+
+                with dpg.child_window(no_scrollbar=False):
+                    for usuario_prest in usuarios_prest:
+                        dpg.add_button(label=str(usuario_prest), callback=lambda s, a, par: prestamo_form_submit(par['id'], par['libro'], par['usuario'], par['origen']), user_data={"id":id, "libro":libro, "usuario":usuario_prest, "origen":origen})
+                    
+
+                dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('prestamo.register', origen))
+        
     def establecer_estilos_globales(self): # Asigna el estilo de los objetos, un "CSS" acá
             ancho = dpg.get_viewport_width()
             alto = dpg.get_viewport_height()
@@ -236,20 +381,17 @@ class GestionApp:
                 else:
                     # print(dpg.get_item_type(item))
                     pass
-                
-
     
     # Inicializar APP
     def run_app(self):
         dpg.set_viewport_resize_callback(lambda sender, app_data: self.establecer_estilos_globales())
-        dpg.create_viewport(title='Gestión de Biblioteca', width=400, height=300)
+        dpg.create_viewport(title='Gestión de Biblioteca', width=1280, height=800)
         dpg.setup_dearpygui()
         dpg.show_viewport()
         dpg.start_dearpygui()
         dpg.destroy_context()
 
-
-
 if __name__ == '__main__':
+
     AppTPI = GestionApp()
     AppTPI.run_app()
