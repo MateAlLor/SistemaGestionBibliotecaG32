@@ -47,5 +47,12 @@
         "libro": 3,
         "fecha_prestamo": "2024-11-10",
         "fecha_devolucion": null
+    },
+    {
+        "id": 7,
+        "usuario": 1,
+        "libro": 0,
+        "fecha_prestamo": "2024-11-11",
+        "fecha_devolucion": "2024-11-11"
     }
 ]

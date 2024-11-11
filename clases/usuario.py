@@ -19,6 +19,11 @@ class Usuario:
         if isinstance(obj2, Usuario):
             return self._ID == obj2._ID
         return False
+    
+    def get_string_tipo(self):
+        if self._Tipo == 1:
+            return "Estudiante"
+        return "Profesor"
         
     @classmethod
     def init_from_json(cls, json_data):

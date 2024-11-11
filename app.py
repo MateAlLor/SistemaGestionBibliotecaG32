@@ -8,6 +8,8 @@ from clases.libro import Libro
 from clases.prestamo import Prestamo
 from clases.usuario import Usuario
 
+import utils.reportes as REPORTES
+
 class GestionApp:
     def __init__(self):
         # Construcción de la APP en DearPygui
@@ -380,6 +382,10 @@ class GestionApp:
         create_reportes(show=False, alert=None)
 
         def create_reportes_prestamosvencidos(show=True, alert=None):
+            def generar_reporte(prestamos):
+                REPORTES.generar_reporte_prestamos_vencidos(prestamos)
+                ir_a_interfaz_mensaje(titulo="Reporte", origen="reportes.prestamos.vencidos", mensaje="Reporte Generado Correctamente")
+
             dpg.delete_item("reportes.prestamos.vencidos")
 
             with dpg.window(label="Préstamos", tag="reportes.prestamos.vencidos", show=show):
@@ -389,10 +395,16 @@ class GestionApp:
                 with dpg.child_window(no_scrollbar=False):
                     for prestamo in prestamos:
                         dpg.add_text(str(prestamo))
+
+                dpg.add_button(label="Generar PDF con Tabla", callback=lambda:generar_reporte(prestamos))
                 dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('reportes.prestamos.vencidos', 'reportes'))
         create_reportes_prestamosvencidos(show=False)
 
         def create_reportes_librosmasprestados(show=True):
+            def generar_reporte(tuplas, tipo_reporte):
+                REPORTES.generar_reporte_librosmasprestados(tuplas, tipo_reporte)
+                ir_a_interfaz_mensaje(titulo="Reporte", origen="reportes.librosmasprestados", mensaje="Reporte Generado Correctamente")
+
             dpg.delete_item("reportes.librosmasprestados")
 
             with dpg.window(label="Libros más prestados", tag="reportes.librosmasprestados", show=show):
@@ -406,12 +418,17 @@ class GestionApp:
                         texto += f"\tISBN: {libro._ISBN}\n"
                         texto += f"\tAutor: {libro._Autor._Nombre} {libro._Autor._Apellido}\n"
                         texto += f"\tCantidad de Préstamos: {cant}"
-                        
 
                         dpg.add_text(texto)
+                dpg.add_button(label="Generar PDF con Tabla", callback=lambda:generar_reporte(tuplas, 0))
+                dpg.add_button(label="Generar PDF con Gráfico", callback=lambda:generar_reporte(tuplas, 1))
                 dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('reportes.librosmasprestados', 'reportes'))
         
         def create_reportes_usuarios_con_mas_prestamos(show=True):
+            def generar_reporte(tuplas, tipo_reporte):
+                REPORTES.generar_reporte_usuarios_con_mas_prestamos(tuplas, tipo_reporte)
+                ir_a_interfaz_mensaje(titulo="Reporte", origen="reportes.usuariosconmasprestamos", mensaje="Reporte Generado Correctamente")
+            
             dpg.delete_item("reportes.usuariosconmasprestamos")
 
             with dpg.window(label="Libros más prestados", tag="reportes.usuariosconmasprestamos", show=show):
@@ -432,6 +449,8 @@ class GestionApp:
                         
 
                         dpg.add_text(texto)
+                dpg.add_button(label="Generar PDF con Tabla", callback=lambda:generar_reporte(tuplas, 0))
+                dpg.add_button(label="Generar PDF con Gráfico", callback=lambda:generar_reporte(tuplas, 1))
                 dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('reportes.usuariosconmasprestamos', 'reportes'))
 
         

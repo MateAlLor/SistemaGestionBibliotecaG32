@@ -2,6 +2,7 @@ from datetime import date
 from db.localdb import Database
 from clases.libro import Libro
 from clases.usuario import Usuario
+from dateutil.relativedelta import relativedelta
 import os
 
 class Prestamo:
@@ -34,6 +35,12 @@ class Prestamo:
         else:
             text += f'\n\tNO DEVUELTO'
         return text
+    
+    def calcular_devolucion(self):
+        fecha_prest = self._FechaPrestamo
+        today = date.today()
+        fecha_estimada = fecha_prest + relativedelta(months=1)
+        return fecha_estimada
     
     @classmethod
     def init_from_json(cls, json_data):

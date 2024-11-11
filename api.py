@@ -3,7 +3,6 @@ from typing import List, Tuple
 from datetime import date
 import os
 from dateutil.relativedelta import relativedelta
-from datetime import datetime, timedelta
 
 from clases.autor import Autor
 from clases.libro import Libro
@@ -84,9 +83,8 @@ class LocalApi:
         prestamos = self.get_prestamos()
         prestamos_vencidos = []
         for prestamo in prestamos:
-            fecha_prest = prestamo._FechaPrestamo
             today = date.today()
-            fecha_estimada = fecha_prest + relativedelta(months=1)
+            fecha_estimada = prestamo.calcular_devolucion()
             
             if not prestamo._FechaDevolucion and fecha_estimada < today:
                 prestamos_vencidos.append(prestamo)
