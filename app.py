@@ -3,12 +3,10 @@ from api import LocalApi
 import dearpygui.dearpygui as dpg
 from datetime import date
 
-
 from clases.autor import Autor
 from clases.libro import Libro
 from clases.prestamo import Prestamo
 from clases.usuario import Usuario
-
 
 class GestionApp:
     def __init__(self):
@@ -37,8 +35,10 @@ class GestionApp:
             newAutor = Autor(id, nombre, apellido, nacionalidad)
             isSuccess, alert = self.LocalApi.add_autor(newAutor)
             # isSuccess, alert = self.LocalApi.add_autor(id, nombre, apellido, nacionalidad)
-
-            create_autores_registrar(alert=alert)# Esto sirve para refrescar la ventana, y que se muestren un mensaje de error si algo pasó
+            
+            create_autores_registrar(alert=alert, show=False)
+            ir_a_interfaz_mensaje(titulo="Autor", origen="autores.registrar", mensaje=alert)
+            # Esto sirve para refrescar la ventana, y que se muestren un mensaje de error si algo pasó
             create_autores_listar(show=False) # Hay que reconstruir la ventana del listado para que tenga los datos actualizados. Pasandole show=False para que no se muestre en el momento
             self.establecer_estilos_globales() # Hay que llamar a esta función después de usar un create, así se actualizan los estilos
             # Todo esto aplica para todos los form de registro
@@ -55,7 +55,8 @@ class GestionApp:
             newUser = Usuario(id, nombre, apellido, nac_int)
 
             isSuccess, alert = self.LocalApi.add_usuario(newUser)
-            create_usuarios_registrar(alert=alert)
+            create_usuarios_registrar(alert=alert, show=False)
+            ir_a_interfaz_mensaje(titulo="Usuario", origen="usuarios.registrar", mensaje=alert)
             create_usuarios_listar(show=False)
             self.establecer_estilos_globales()
         
@@ -67,8 +68,13 @@ class GestionApp:
             autor_id = int(dpg.get_value("form.libro.autorid"))
             cantidad = int(dpg.get_value("form.libro.cantidad"))
 
-            isSuccess, alert = self.LocalApi.add_libro(isbn, titulo, genero, anio, autor_id, cantidad)
-            create_libros_registrar(alert=alert)
+            libro_autor = self.LocalApi.get_autor_byid(autor_id)
+
+            new_libro = Libro(isbn, titulo, genero, anio, libro_autor, cantidad)
+
+            isSuccess, alert = self.LocalApi.add_libro(new_libro)
+            create_libros_registrar(alert=alert, show=False)
+            ir_a_interfaz_mensaje(titulo="Libro", origen="libros.registrar", mensaje=alert)
             create_libros_listar(show=False)
             self.establecer_estilos_globales()
         
@@ -115,6 +121,21 @@ class GestionApp:
             cambiar_ventana(origen, "interfaz.mensaje")
             self.establecer_estilos_globales()
         
+        def ir_a_reportes_prestvencidos():
+            create_reportes_prestamosvencidos(show=False)
+            cambiar_ventana('reportes', 'reportes.prestamos.vencidos')
+            self.establecer_estilos_globales()
+        
+        def ir_a_reportes_librosmasprestados():
+            create_reportes_librosmasprestados(show=False)
+            cambiar_ventana('reportes', 'reportes.librosmasprestados')
+            self.establecer_estilos_globales()
+        
+        def ir_a_reportes_usuarios_con_mas_prestamos():
+            create_reportes_usuarios_con_mas_prestamos(show=False)
+            cambiar_ventana('reportes', 'reportes.usuariosconmasprestamos')
+            self.establecer_estilos_globales()
+
         # INTERFAZ DE MENSAJE
         def create_mensaje_interfaz(show=True, titulo=None, destino=None, mensaje=None):
             dpg.delete_item("interfaz.mensaje")
@@ -135,6 +156,7 @@ class GestionApp:
                 dpg.add_button(label="Autores", callback=lambda:cambiar_ventana('inicio', 'autores'))
                 dpg.add_button(label="Usuarios", callback=lambda:cambiar_ventana('inicio', 'usuarios'))
                 dpg.add_button(label="Libros", callback=lambda:cambiar_ventana('inicio', 'libros'))
+                dpg.add_button(label="Reportes", callback=lambda:cambiar_ventana('inicio', 'reportes'))
         create_inicio()
         
         # INTERFAZ DE AUTORES
@@ -234,7 +256,6 @@ class GestionApp:
                 dpg.add_button(label="Registrar", callback=lambda:cambiar_ventana('libros', 'libros.registrar'))
                 dpg.add_button(label="Listar", callback=lambda:cambiar_ventana('libros', 'libros.listar'))
                 dpg.add_button(label="Volver al Inicio", callback=lambda:cambiar_ventana('libros', 'inicio'))
-        # create_libros(show=False)
         create_libros(show=False)
         
 
@@ -303,18 +324,6 @@ class GestionApp:
                     
 
                 dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('libro.detalles', origen))
-        
-        # INTERFAZ PRESTAMOS
-        # def create_prestamos(show=False, alert=None):
-        #     dpg.delete_item("prestamos")
-
-        #     with dpg.window(label="Préstamos", tag="prestamos", show=show):
-        #         if alert:
-        #             dpg.add_text(alert, tag='prestamos.alert')
-        #         dpg.add_button(label="Registrar", callback=lambda:cambiar_ventana('prestamos', 'prestamos.registrar'))
-        #         dpg.add_button(label="Listar", callback=lambda:cambiar_ventana('prestamos', 'prestamos.listar'))
-        #         dpg.add_button(label="Buscar Préstamo", callback=lambda:cambiar_ventana('prestamos', 'prestamos.buscar'))
-        #         dpg.add_button(label="Volver al Inicio", callback=lambda:cambiar_ventana('prestamos', 'inicio'))
 
         def create_prestamo_detalles(show=True, alert=None, prestamo=None, origen='inicio'):
             dpg.delete_item("prestamo.detalles")
@@ -354,6 +363,77 @@ class GestionApp:
                     
 
                 dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('prestamo.register', origen))
+        
+        # REPORTES
+        def create_reportes(show=True, alert=None):
+            dpg.delete_item("reportes")
+
+            with dpg.window(label="Reportes", tag="reportes", show=show):
+                if alert:
+                    dpg.add_text(alert, tag='reportes.alert')
+                dpg.add_button(label="Préstamos Vencidos", callback=lambda:ir_a_reportes_prestvencidos())
+                dpg.add_button(label="Libros más Prestados", callback=lambda:ir_a_reportes_librosmasprestados())
+                dpg.add_button(label="Usuarios con más Préstamos pedidos", callback=lambda:ir_a_reportes_usuarios_con_mas_prestamos())
+
+                dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('reportes', 'inicio'))
+
+        create_reportes(show=False, alert=None)
+
+        def create_reportes_prestamosvencidos(show=True, alert=None):
+            dpg.delete_item("reportes.prestamos.vencidos")
+
+            with dpg.window(label="Préstamos", tag="reportes.prestamos.vencidos", show=show):
+                if alert:
+                    dpg.add_text(alert, tag='reportes.prestamos.vencidos.alert')
+                prestamos = self.LocalApi.get_prestamos_vencidos() # Obtener listado de Libros
+                with dpg.child_window(no_scrollbar=False):
+                    for prestamo in prestamos:
+                        dpg.add_text(str(prestamo))
+                dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('reportes.prestamos.vencidos', 'reportes'))
+        create_reportes_prestamosvencidos(show=False)
+
+        def create_reportes_librosmasprestados(show=True):
+            dpg.delete_item("reportes.librosmasprestados")
+
+            with dpg.window(label="Libros más prestados", tag="reportes.librosmasprestados", show=show):
+                tuplas = self.LocalApi.get_libros_mas_prestados() # Obtener listado de Libros
+                with dpg.child_window(no_scrollbar=False):
+                    for tup in tuplas:
+                        libro = tup[0]
+                        cant = tup[1]
+
+                        texto = f"Libro: {libro._Titulo}\n"
+                        texto += f"\tISBN: {libro._ISBN}\n"
+                        texto += f"\tAutor: {libro._Autor._Nombre} {libro._Autor._Apellido}\n"
+                        texto += f"\tCantidad de Préstamos: {cant}"
+                        
+
+                        dpg.add_text(texto)
+                dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('reportes.librosmasprestados', 'reportes'))
+        
+        def create_reportes_usuarios_con_mas_prestamos(show=True):
+            dpg.delete_item("reportes.usuariosconmasprestamos")
+
+            with dpg.window(label="Libros más prestados", tag="reportes.usuariosconmasprestamos", show=show):
+                tuplas = self.LocalApi.get_usuarios_con_mas_prestamos() # Obtener listado de Libros
+                with dpg.child_window(no_scrollbar=False):
+                    for tup in tuplas:
+                        usuario = tup[0]
+                        cant = tup[1]
+
+                        texto = f"Usuario: {usuario._Nombre} {usuario._Apellido}\n"
+                        texto += f"\tID: {usuario._ID}\n"
+                        if usuario._Tipo == 1:
+                            texto += f"\tTipo: Estudiante\n"
+                        else:
+                            texto += f"\tTipo: Profesor\n"
+                
+                        texto += f"\tCantidad de Préstamos: {cant}"
+                        
+
+                        dpg.add_text(texto)
+                dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('reportes.usuariosconmasprestamos', 'reportes'))
+
         
     def establecer_estilos_globales(self): # Asigna el estilo de los objetos, un "CSS" acá
             ancho = dpg.get_viewport_width()

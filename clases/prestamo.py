@@ -14,8 +14,20 @@ class Prestamo:
     
     def __str__(self):
         text = f'ID: {self._ID}'
-        text += f'\n\tUsuario: {self._Usuario}'
-        text += f'\n\tLibro: {self._Libro}'
+
+        text += f'\n\tUsuario:'
+        text += f'\n\t\t{self._Usuario._Nombre} {self._Usuario._Apellido}'
+        text += f'\n\t\tID: {self._Usuario._ID}'
+        if self._Usuario._Tipo == 1:
+            text += f'\n\t\tTipo: Estudiante'
+        else:
+            text += f'\n\t\tTipo: Profesor'
+
+        text += f'\n\tLibro: '
+        text += f'\n\t\tISBN: {self._Libro._ISBN}'
+        text += f'\n\t\tTítulo: {self._Libro._Titulo}'
+        text += f'\n\t\tAutor: {self._Libro._Autor._Nombre} {self._Libro._Autor._Apellido}'
+
         text += f'\n\tFecha del Préstamo: {self._FechaPrestamo}'
         if self._FechaDevolucion:
             text += f'\n\tFecha de Devolución: {self._FechaDevolucion}'
