@@ -14,6 +14,11 @@ class Usuario:
         text += f'\n\tApellido: {self._Apellido}'
         text += f'\n\tTipo: {self._Tipo}'
         return text
+    
+    def __eq__(self, obj2):
+        if isinstance(obj2, Usuario):
+            return self._ID == obj2._ID
+        return False
         
     @classmethod
     def init_from_json(cls, json_data):

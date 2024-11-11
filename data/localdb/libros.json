@@ -1,1 +1,42 @@
-[]
+[
+    {
+        "isbn": 0,
+        "titulo": "1984",
+        "genero": "Distop\u00eda",
+        "anio": 1949,
+        "autor": 1,
+        "cantidad": 2
+    },
+    {
+        "isbn": 1,
+        "titulo": "Don Quijote",
+        "genero": "S\u00e1tira",
+        "anio": 1615,
+        "autor": 3,
+        "cantidad": 0
+    },
+    {
+        "isbn": 2,
+        "titulo": "Viaje al centro de la Tierra",
+        "genero": "Ciencia Ficci\u00f3n",
+        "anio": 1864,
+        "autor": 0,
+        "cantidad": 4
+    },
+    {
+        "isbn": 3,
+        "titulo": "La vuelta al mundo en ochenta d\u00edas",
+        "genero": "Aventura",
+        "anio": 1872,
+        "autor": 0,
+        "cantidad": 1
+    },
+    {
+        "isbn": 5,
+        "titulo": "Rayuela",
+        "genero": "Novela experimental",
+        "anio": 1963,
+        "autor": 2,
+        "cantidad": 1
+    }
+]

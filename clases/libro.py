@@ -19,21 +19,22 @@ class Libro:
         text += f'\n\tAutor: {self._Autor}'
         text += f'\n\tCantidad Disponible: {self._Cantidad}'
         return text
+
+    def __eq__(self, obj2):
+        if isinstance(obj2, Libro):
+            return self._ISBN == obj2._ISBN
+        return False
     
     @classmethod
     def init_from_json(cls, json_data):
-        # print("ENTRA AL INIT FROM JSON DEL LIBRO")
         db = Database(os.path.join("data", "localdb"))
         autores_json = db.load_file('autores.json')
-        # print('LOS AUTORES JSON SON ESTOS:')
-        # print(autores_json)
 
         autor_final = None
         for autor_json in autores_json:
             if autor_json['id'] == json_data['autor']:
                 autor_final = Autor.init_from_json(autor_json)
                 break
-        # print("EL AUTOR FINAL ES ESTE:", autor_final)
 
         return cls(
             isbn=json_data['isbn'],

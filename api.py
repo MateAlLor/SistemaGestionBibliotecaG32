@@ -1,7 +1,9 @@
-from db.localdb import Database # Cambiar el import a Database cuando dejemos de usar archivos
-from typing import List
+from db.localdb import Database
+from typing import List, Tuple
 from datetime import date
 import os
+from dateutil.relativedelta import relativedelta
+from datetime import datetime, timedelta
 
 from clases.autor import Autor
 from clases.libro import Libro
@@ -10,7 +12,7 @@ from clases.usuario import Usuario
 
 class LocalApi:
     def __init__(self) -> None:
-        self.DATABASE = Database(os.path.join("data", "localdb")) # Para cuando usemos una DB
+        self.DATABASE = Database(os.path.join("data", "localdb"))
 
     # LECTURAS
     def get_autores(self) -> List[Autor]:
@@ -77,7 +79,83 @@ class LocalApi:
                 prestamos_por_libro.append(prestamo)
         
         return prestamos_por_libro
+
+    def get_prestamos_vencidos(self) -> List[Prestamo]:
+        prestamos = self.get_prestamos()
+        prestamos_vencidos = []
+        for prestamo in prestamos:
+            fecha_prest = prestamo._FechaPrestamo
+            today = date.today()
+            fecha_estimada = fecha_prest + relativedelta(months=1)
+            
+            if not prestamo._FechaDevolucion and fecha_estimada < today:
+                prestamos_vencidos.append(prestamo)
+        return prestamos_vencidos
     
+    def get_libros_mas_prestados(self) -> List[Tuple[Libro, int]]:
+        prestamos = self.get_prestamos()
+        lista_libros = []
+        for prestamo in prestamos:
+            pr_fecha = prestamo._FechaPrestamo
+            today_fecha = date.today()
+
+            if pr_fecha.year == today_fecha.year and pr_fecha.month == today_fecha.month:
+                pr_libro = prestamo._Libro
+
+                found, ind, cant = False, 0, 1
+                for ind_aux, tupla in enumerate(lista_libros):
+                    if pr_libro == tupla[0]:
+                        ind = ind_aux
+                        cant = tupla[1] + 1
+                        found = True
+                        break
+
+                new_tupla = (pr_libro, cant)
+                
+                if found:
+                    for i in range(ind, -1, -1):
+                        for_tupla = lista_libros[i]
+                        if (new_tupla[1] <= for_tupla[1]) or i==0:
+                            del lista_libros[ind]
+                            lista_libros.insert(i, new_tupla)
+                            break
+                else:
+                    lista_libros.append((pr_libro, 1))
+
+        return lista_libros
+    
+    def get_usuarios_con_mas_prestamos(self) -> List[Tuple[Usuario, int]]:
+        prestamos = self.get_prestamos()
+
+        lista_usuarios = []
+
+        for prestamo in prestamos:
+            pr_user = prestamo._Usuario
+
+            found, ind, cant = False, 0, 1
+            for ind_aux, tupla in enumerate(lista_usuarios):
+                if pr_user == tupla[0]:
+                    ind = ind_aux
+                    cant = tupla[1] + 1
+                    found = True
+                    break
+
+            new_tupla = (pr_user, cant)
+            
+            if found:
+                for i in range(ind, -1, -1):
+                    for_tupla = lista_usuarios[i]
+                    if (new_tupla[1] <= for_tupla[1]) or i==0:
+                        del lista_usuarios[ind]
+                        lista_usuarios.insert(i, new_tupla)
+                        break
+            else:
+                lista_usuarios.append((pr_user, 1))
+        
+        return lista_usuarios
+
+
+                
     # Obtener IDS Autoincrementales (El unico que no tiene ID autoincremental es el Libro)
     def get_autor_id(self) -> int:
         return self.DATABASE.obtener_id_ai('autores.json')
@@ -87,13 +165,12 @@ class LocalApi:
         return self.DATABASE.obtener_id_ai('prestamos.json')
     
     # Escrituras
-    # def add_libro(self, isbn : int, titulo : str, genero : str, anio : int, autor_id : int, cantidad : int) -> tuple[bool, str]:
     def add_libro(self, libro_param : Libro) -> tuple[bool, str]:
         isbn = libro_param._ISBN
         titulo = libro_param._Titulo
         genero = libro_param._Genero
         anio = libro_param._Anio
-        autor_id = libro_param._Autor
+        autor_id = libro_param._Autor._ID
         cantidad = libro_param._Cantidad
 
         if isbn == None or titulo.replace(' ', '') == "" or genero.replace(' ', '') == "" or anio == None or autor_id == None or cantidad == None:
@@ -152,8 +229,6 @@ class LocalApi:
         return new_prestamo, 'Prestamo devuelto correctamente'
         
 
-
-    # def add_autor(self, id : int, nombre : str, apellido : str, nacionalidad : str) -> tuple[bool, str]:
     def add_autor(self, autor : Autor) -> tuple[bool, str]:
         id = autor._ID
         nombre = autor._Nombre
@@ -176,7 +251,7 @@ class LocalApi:
         self.DATABASE.save_file('autores.json', autores_json)
         return True, "Autor registrado correctamente"
     
-    # def add_usuario(self, id : int, nombre : str, apellido : str, tipo : int) -> tuple[bool, str]:
+
     def add_usuario(self, usuario : Usuario) -> tuple[bool, str]:
         id = usuario._ID
         nombre = usuario._Nombre

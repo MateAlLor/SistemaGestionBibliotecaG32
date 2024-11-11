@@ -1,1 +1,32 @@
-[]
+[
+    {
+        "id": 0,
+        "nombre": "Jos\u00e9",
+        "apellido": "P\u00e9rez",
+        "tipo": 1
+    },
+    {
+        "id": 1,
+        "nombre": "Arnoldo",
+        "apellido": "Aliaga",
+        "tipo": 2
+    },
+    {
+        "id": 2,
+        "nombre": "Joaqu\u00edn",
+        "apellido": "G\u00f3mez",
+        "tipo": 1
+    },
+    {
+        "id": 3,
+        "nombre": "Esteban",
+        "apellido": "Ferreyra",
+        "tipo": 2
+    },
+    {
+        "id": 4,
+        "nombre": "Tom\u00e1s",
+        "apellido": "P\u00e9rez",
+        "tipo": 1
+    }
+]

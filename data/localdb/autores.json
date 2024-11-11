@@ -1,1 +1,26 @@
-[]
+[
+    {
+        "id": 0,
+        "nombre": "Julio",
+        "apellido": "Verne",
+        "nacionalidad": "Franc\u00e9s"
+    },
+    {
+        "id": 1,
+        "nombre": "George",
+        "apellido": "Orwell",
+        "nacionalidad": "Ingl\u00e9s"
+    },
+    {
+        "id": 2,
+        "nombre": "Julio",
+        "apellido": "Cort\u00e1zar",
+        "nacionalidad": "Argentino"
+    },
+    {
+        "id": 3,
+        "nombre": "Miguel",
+        "apellido": "Cervantes",
+        "nacionalidad": "Espa\u00f1ol"
+    }
+]
