@@ -67,7 +67,7 @@ class GestionApp:
             titulo = dpg.get_value("form.libro.titulo")
             genero = dpg.get_value("form.libro.genero")
             anio = int(dpg.get_value("form.libro.anio"))
-            autor_id = int(dpg.get_value("form.libro.autorid"))
+            autor_id = int(dpg.get_value("form.libro.autorid").split("-")[0])
             cantidad = int(dpg.get_value("form.libro.cantidad"))
 
             libro_autor = self.LocalApi.get_autor_byid(autor_id)
@@ -182,11 +182,42 @@ class GestionApp:
                 if alert:
                     dpg.add_text(alert, tag='autores.registrar.alert')
                 id = self.LocalApi.get_autor_id() # Para precargar el ID autoincremental
-                dpg.add_text(f"ID del Autor {id}", tag='form.autor.id')
+
+                dpg.add_text(f"ID del Autor {id}", tag='form.autor.id') # ACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
                 dpg.add_text("Ingrese los datos del Autor a continuación:")
                 dpg.add_input_text(label="Nombre", tag="form.autor.nombre", hint="Escribe el nombre del autor")
                 dpg.add_input_text(label="Apellido", tag="form.autor.apellido", hint="Escribe el apellido del autor")
-                dpg.add_input_text(label="Nacionalidad", tag="form.autor.nacionalidad", hint="Escribe la nacionalidad del autor")
+                #dpg.add_input_text(label="Nacionalidad", tag="form.autor.nacionalidad", hint="Escribe la nacionalidad del autor")
+                paises = [
+                    "Argentina",
+                    "Australia",
+                    "Brasil",
+                    "Canadá",
+                    "Chile",
+                    "China",
+                    "Colombia",
+                    "Cuba",
+                    "Egipto",
+                    "España",
+                    "Estados Unidos",
+                    "Francia",
+                    "India",
+                    "Irlanda",
+                    "Italia",
+                    "Japón",
+                    "México",
+                    "Rusia",
+                    "Reino Unido",
+                    "Suecia",
+                    "Turquía",
+                    "Uruguay",
+                    "Venezuela"
+                ]
+
+                
+                # Menú desplegable para seleccionar la nacionalidad
+                dpg.add_combo(paises, label="Nacionalidad", tag="form.autor.nacionalidad", default_value=paises[0])
+
                 dpg.add_button(label="Registrar", callback=lambda:autores_form_submit(id))
                 dpg.add_button(label="Volver", callback=lambda:cambiar_ventana('autores.registrar', 'autores'))
         create_autores_registrar(show=False, alert=None)
@@ -270,9 +301,40 @@ class GestionApp:
                 dpg.add_text("Ingrese los datos del Libro a continuación")
                 dpg.add_input_int(label="ISBN", tag="form.libro.isbn", min_value=0)
                 dpg.add_input_text(label="Título", tag="form.libro.titulo", hint="Escribe el título del libro")
-                dpg.add_input_text(label="Genero", tag="form.libro.genero", hint="Escribe el género del libro")
+                #dpg.add_input_text(label="Genero", tag="form.libro.genero", hint="Escribe el género del libro")
+                generos = [
+                    "Aventura",
+                    "Ciencia Ficción",
+                    "Fantasía",
+                    "Terror",
+                    "Misterio",
+                    "Romántico",
+                    "Histórico",
+                    "Drama",
+                    "Policíaco",
+                    "Thriller",
+                    "Biografía",
+                    "Ensayo",
+                    "Poesía",
+                    "Autobiografía",
+                    "Ficción Contemporánea",
+                    "Literatura Infantil",
+                    "Literatura Juvenil",
+                    "Ficción Histórica"
+                ]
+                
+                # Combo para seleccionar el género
+                dpg.add_combo(generos, label="Género", tag="form.libro.genero", default_value=generos[0])
                 dpg.add_input_int(label="Año", tag="form.libro.anio", min_value=0)
-                dpg.add_input_int(label="ID del Autor", tag="form.libro.autorid", min_value=0)
+                autores = self.LocalApi.get_autores()
+                vecstr = []
+                for autor in autores:
+                    #autorstr = str(autor._ID) + ", " + autor._Nombre + ", " + autor._Apellido
+                    autorstr = f'{autor._ID} - {autor._Nombre} {autor._Apellido}'
+                    vecstr.append(autorstr)
+                print(vecstr)
+                dpg.add_combo(vecstr, label="Seleccionar Autor", tag="form.libro.autorid", default_value=vecstr[0] if vecstr else "")
+                #dpg.add_input_int(label="ID del Autor", tag="form.libro.autorid", min_value=0)
                 dpg.add_input_int(label="Cantidad", tag="form.libro.cantidad", min_value=0)
 
                 dpg.add_button(label="Registrar", callback=lambda:libros_form_submit(id))
@@ -484,7 +546,10 @@ class GestionApp:
     # Inicializar APP
     def run_app(self):
         dpg.set_viewport_resize_callback(lambda sender, app_data: self.establecer_estilos_globales())
-        dpg.create_viewport(title='Gestión de Biblioteca', width=1280, height=800)
+        dpg.create_viewport(title='Gestion de Biblioteca', width=1280, height=800)
+
+        dpg.set_viewport_large_icon("iconoPrincipal.ico")  # Usa un archivo .ico para mejor compatibilidad
+        dpg.set_viewport_small_icon("iconoPrincipal.ico")
         dpg.setup_dearpygui()
         dpg.show_viewport()
         dpg.start_dearpygui()

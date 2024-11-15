@@ -38,5 +38,37 @@
         "anio": 1963,
         "autor": 2,
         "cantidad": 1
+    },
+    {
+        "isbn": 3556,
+        "titulo": "Harry Potter",
+        "genero": "Infantil",
+        "anio": 2006,
+        "autor": 2,
+        "cantidad": 6
+    },
+    {
+        "isbn": 14,
+        "titulo": "Piter Pan",
+        "genero": "Literatura Infantil",
+        "anio": 1992,
+        "autor": 2,
+        "cantidad": 3
+    },
+    {
+        "isbn": 8999,
+        "titulo": "Qui jote",
+        "genero": "Aventura",
+        "anio": 1700,
+        "autor": 3,
+        "cantidad": 8
+    },
+    {
+        "isbn": 15656,
+        "titulo": "La isla misteriosa",
+        "genero": "Misterio",
+        "anio": 1955,
+        "autor": 5,
+        "cantidad": 3
     }
 ]

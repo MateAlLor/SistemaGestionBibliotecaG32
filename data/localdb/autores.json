@@ -22,5 +22,17 @@
         "nombre": "Miguel",
         "apellido": "Cervantes",
         "nacionalidad": "Espa\u00f1ol"
+    },
+    {
+        "id": 4,
+        "nombre": "Pedro",
+        "apellido": "Carre\u00f1o",
+        "nacionalidad": "Argentina"
+    },
+    {
+        "id": 5,
+        "nombre": "Paulinho",
+        "apellido": "Ortigaz",
+        "nacionalidad": "Brasil"
     }
 ]

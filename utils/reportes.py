@@ -31,19 +31,37 @@ def crear_nombre_archivo(tipo):
     fecha_hora_actual = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     return f"{fecha_hora_actual}_{tp_rep}.pdf"
 
-def crear_grafico(data : List[int], labels : List[str]):
+
+import matplotlib.pyplot as plt
+from typing import List
+from io import BytesIO
+
+def crear_grafico(data: List[int], labels: List[str]):
     buffer = BytesIO()
 
-    plt.figure(figsize=(5, 5))
-    plt.pie(data, labels=labels, autopct='%1.1f%%')
-    plt.axis('equal')
+    plt.figure(figsize=(6, 6))  # Aumenté ligeramente el tamaño para mejor visualización
+    wedges, texts, autotexts = plt.pie(
+        data, 
+        labels=labels, 
+        autopct='%1.1f%%', 
+        textprops={'fontsize': 8}  # Tamaño de letra más pequeño para los labels
+    )
 
-    
-    plt.savefig(buffer, format='png')
+    # Ajusta los porcentajes dentro del gráfico
+    for autotext in autotexts:
+        autotext.set_fontsize(10)  # Tamaño de letra más grande
+        autotext.set_fontweight('bold')  # Texto en negrita
+
+    plt.axis('equal')  # Asegura que el gráfico sea circular
+    plt.tight_layout()  # Ajusta automáticamente los márgenes
+
+    plt.savefig(buffer, format='png', bbox_inches='tight')  # Guarda la imagen con márgenes ajustados
     plt.close()
 
     buffer.seek(0)
     return buffer
+
+
 
 def calcular_ancho_columnas(columnas: List[str], data: List[List], font_name="Helvetica", font_size=10):
     # Determina el ancho de cada columna en función del mayor elemento de cada una
